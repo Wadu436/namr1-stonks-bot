@@ -1,6 +1,6 @@
 # charles-stonks-bot
 
-Create a .env file with a discord token: \
+Create a .env file with a discord token:
 
 ```
 DISCORD_TOKEN=...
