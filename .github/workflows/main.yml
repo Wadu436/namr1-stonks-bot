@@ -40,7 +40,7 @@ jobs:
 
       # Send it over to the server
       - name: save container
-        run: mkdir -P sync/containers && docker save namr1-stonks:latest | gzip > sync/containers/namr1-stonks-latest.tar.gz
+        run: mkdir --parents sync/containers && docker save namr1-stonks:latest | gzip > sync/containers/namr1-stonks-latest.tar.gz
 
       - name: copy compose file to sync folder
         run: cp docker-compose.yml sync/
