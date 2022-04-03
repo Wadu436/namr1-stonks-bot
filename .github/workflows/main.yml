@@ -32,14 +32,17 @@ jobs:
         run: docker-compose build
 
       - name: save container
-        run: mkdir containers && docker save namr1-stonks:latest | gzip > containers/namr1-stonks-latest.tar.gz
+        run: mkdir -P sync/containers && docker save namr1-stonks:latest | gzip > sync/containers/namr1-stonks-latest.tar.gz
 
-      - name: send container to server (rsync)
+      - name: copy compose file to sync folder
+        run: cp docker-compose.yml sync/
+
+      - name: send container and compose file to server (rsync)
         uses: burnett01/rsync-deployments@5.2
         with:
           switches: -avzr --delete --exclude .env
-          path: containers
-          remote_path: ~/namr1-stonks-bot/
+          path: sync
+          remote_path: ~/namr1-stonks-bot
           remote_host: ${{ secrets.SSH_HOST }}
           remote_user: ${{ secrets.SSH_USERNAME }}
           remote_key: ${{ secrets.SSH_KEY }}
