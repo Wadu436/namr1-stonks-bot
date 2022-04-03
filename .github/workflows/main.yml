@@ -28,7 +28,7 @@ jobs:
       - name: rsync deployments
         uses: burnett01/rsync-deployments@5.2
         with:
-          switches: -avzr --delete --exclude '.env'
+          switches: -avzr --delete --exclude .env
           path: /
           remote_path: ~/namr1-stonks-bot/
           remote_host: ${{ secrets.SSH_HOST }}
@@ -45,3 +45,4 @@ jobs:
           script: |
             cd ~/namr1-stonks-bot/
             docker-compose up --build -d
+          command_timeout: 60m
