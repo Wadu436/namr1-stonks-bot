@@ -3,6 +3,6 @@ services:
   bot:
     image: namr1-stonks
     build: .
-    # env_file:
-    #   - .env
+    env_file:
+      - .env
     network_mode: host
