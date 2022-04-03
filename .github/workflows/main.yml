@@ -66,6 +66,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd ~/namr1-stonks-bot/ && \
-            docker load -i namr1-stonks-latest.tar.gz && \
+            docker load -i containers/namr1-stonks-latest.tar.gz && \
             docker-compose up -d
           command_timeout: 5m
