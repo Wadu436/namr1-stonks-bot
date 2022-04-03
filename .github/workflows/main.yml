@@ -25,15 +25,23 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
+      - name: build container
+        run: docker-compose build
+
+      - name: save container
+        run: docker save namr1-stonks:latest | gzip > containers/namr1-stonks-latest.tar.gz
+
       - name: rsync deployments
         uses: burnett01/rsync-deployments@5.2
         with:
           switches: -avzr --delete --exclude .env
-          path: /
+          path: containers
           remote_path: ~/namr1-stonks-bot/
           remote_host: ${{ secrets.SSH_HOST }}
           remote_user: ${{ secrets.SSH_USERNAME }}
           remote_key: ${{ secrets.SSH_KEY }}
+
+      -
 
       - name: Deploy to server
         uses: appleboy/ssh-action@master
@@ -44,5 +52,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd ~/namr1-stonks-bot/
-            docker-compose up --build -d
-          command_timeout: 60m
+            docker load -i namr1-stonks-latest.tar.gz
+            docker-compose up -d
+          command_timeout: 5m
