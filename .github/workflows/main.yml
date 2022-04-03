@@ -37,6 +37,7 @@ jobs:
           tags: namr1-stonks:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          load: true
 
       # Send it over to the server
       - name: save container
@@ -64,7 +65,7 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ~/namr1-stonks-bot/
-            docker load -i namr1-stonks-latest.tar.gz
+            cd ~/namr1-stonks-bot/ && \
+            docker load -i namr1-stonks-latest.tar.gz && \
             docker-compose up -d
           command_timeout: 5m
