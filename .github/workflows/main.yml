@@ -31,7 +31,7 @@ jobs:
       - name: save container
         run: docker save namr1-stonks:latest | gzip > containers/namr1-stonks-latest.tar.gz
 
-      - name: rsync deployments
+      - name: send container to server (rsync)
         uses: burnett01/rsync-deployments@5.2
         with:
           switches: -avzr --delete --exclude .env
@@ -41,9 +41,7 @@ jobs:
           remote_user: ${{ secrets.SSH_USERNAME }}
           remote_key: ${{ secrets.SSH_KEY }}
 
-      -
-
-      - name: Deploy to server
+      - name: load + start container
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
