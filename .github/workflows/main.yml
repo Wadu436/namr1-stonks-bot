@@ -29,9 +29,7 @@ jobs:
         run: docker-compose build
 
       - name: save container
-        run: |
-        mkdir containers
-        docker save namr1-stonks:latest | gzip > containers/namr1-stonks-latest.tar.gz
+        run: mkdir containers && docker save namr1-stonks:latest | gzip > containers/namr1-stonks-latest.tar.gz
 
       - name: send container to server (rsync)
         uses: burnett01/rsync-deployments@5.2
