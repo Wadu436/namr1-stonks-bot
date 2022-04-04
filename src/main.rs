@@ -167,12 +167,34 @@ async fn change_role_task(
         (japanese_green, japanese_red)
     };
 
+    let mut role_changes = false;
     if !member.roles.contains(&set_role.id) {
+        println!(
+            "Adding role {} to {}...",
+            set_role.name,
+            member.display_name()
+        );
         member.add_role(cache_http, set_role).await?;
+        role_changes = true;
     }
 
     if member.roles.contains(&unset_role.id) {
+        println!(
+            "Removing role {} to {}...",
+            set_role.name,
+            member.display_name()
+        );
         member.remove_role(cache_http, unset_role).await?;
+        role_changes = true;
+    }
+
+    if role_changes {
+        println!(
+            "Updated user {} because {} is changed {}% today.",
+            member.display_name(),
+            ticker,
+            change
+        );
     }
 
     Ok(())
