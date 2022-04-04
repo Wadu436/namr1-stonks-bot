@@ -34,8 +34,9 @@ const JAPANESE_GREEN_ID: RoleId = RoleId(621894745807126538);
 const JAPANESE_RED_ID: RoleId = RoleId(621894973360439299);
 const NAMR1_GUILD_ID: GuildId = GuildId(286572805137498112);
 const USER_ID_TICKER: &[(UserId, &str)] = &[
-    (UserId(178070915542810624), "^GSPC"), // Charles
-    (UserId(168355107396780032), "AMC"),   // Nam
+    (UserId(178070915542810624), "^GSPC"),   // Charles
+    (UserId(168355107396780032), "AMC"),     // Nam
+    (UserId(158510518078930944), "IWDA.AS"), // Warre
 ];
 
 #[async_trait]
