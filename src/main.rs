@@ -5,6 +5,7 @@ use chrono_tz;
 
 use dotenv::dotenv;
 
+use serenity::async_trait;
 use serenity::client::{Client, Context, EventHandler};
 use serenity::http::CacheHttp;
 use serenity::model::{
@@ -12,7 +13,6 @@ use serenity::model::{
     id::{GuildId, RoleId, UserId},
     prelude::Ready,
 };
-use serenity::{async_trait, CacheAndHttp};
 
 use std::env;
 use std::error::Error;
@@ -30,6 +30,14 @@ struct Handler {
     is_loop_running: AtomicBool,
 }
 
+const JAPANESE_GREEN_ID: RoleId = RoleId(621894745807126538);
+const JAPANESE_RED_ID: RoleId = RoleId(621894973360439299);
+const NAMR1_GUILD_ID: GuildId = GuildId(286572805137498112);
+const USER_ID_TICKER: &[(UserId, &str)] = &[
+    (UserId(178070915542810624), "^GSPC"), // Charles
+    (UserId(168355107396780032), "AMC"),   // Nam
+];
+
 #[async_trait]
 impl EventHandler for Handler {
     async fn ready(&self, _ctx: Context, ready: Ready) {
@@ -42,7 +50,7 @@ impl EventHandler for Handler {
         let ctx = Arc::new(ctx);
         if !self.is_loop_running.load(Ordering::Relaxed) {
             let ctx = Arc::clone(&ctx);
-            tokio::spawn(charles_task_repeat(ctx));
+            tokio::spawn(role_task_repeat(ctx));
             self.is_loop_running.swap(true, Ordering::Relaxed);
         }
     }
@@ -58,9 +66,9 @@ impl QuoteTime for yahoo::Quote {
     }
 }
 
-async fn get_gspc_change_percentage() -> Result<f64, Box<dyn Error>> {
+async fn get_ticker_change_percentage(ticket: &str) -> Result<f64, Box<dyn Error>> {
     let yahoo_conn = yahoo::YahooConnector::new();
-    let quote_res = yahoo_conn.get_quote_range("^GSPC", "1d", "5d").await?;
+    let quote_res = yahoo_conn.get_quote_range(ticket, "1d", "5d").await?;
 
     let quotes = quote_res.quotes()?;
 
@@ -101,7 +109,7 @@ async fn get_gspc_change_percentage() -> Result<f64, Box<dyn Error>> {
     return Ok(pcntg);
 }
 
-async fn charles_task_repeat(ctx: Arc<Context>) {
+async fn role_task_repeat(ctx: Arc<Context>) {
     // let mut long_interval = time::interval(Duration::from_secs(1 * 24 * 60 * 60)); // Long delay, once per day
     let mut long_interval = time::interval(Duration::from_secs(60)); // Long delay, every minute
     let mut short_interval = time::interval(Duration::from_secs(5)); // Short delay for when we encounter an error
@@ -114,33 +122,31 @@ async fn charles_task_repeat(ctx: Arc<Context>) {
     short_interval.tick().await;
 
     loop {
-        let mut retry = false;
+        for (id, ticker) in USER_ID_TICKER {
+            let mut retry_count = 3;
+            while retry_count > 0 {
+                if let Err(why) = change_role_task(ctx.clone(), id, ticker).await {
+                    eprintln!("{}", why);
+                } else {
+                    break;
+                }
+                retry_count -= 1;
 
-        if let Err(why) = charles_task(ctx.clone()).await {
-            eprintln!("{}", why);
-            retry = true;
+                short_interval.tick().await;
+            }
         }
 
-        if !retry {
-            long_interval.tick().await;
-        } else {
-            short_interval.tick().await;
-        }
+        long_interval.tick().await;
     }
 }
 
-async fn charles_task(ctx: Arc<Context>) -> Result<(), Box<dyn Error>> {
-    const JAPANESE_GREEN_ID: RoleId = RoleId(621894745807126538);
-    const JAPANESE_RED_ID: RoleId = RoleId(621894973360439299);
-    const NAMR1_GUILD_ID: GuildId = GuildId(286572805137498112);
-    const CHARLES_ID: UserId = UserId(178070915542810624);
-
+async fn change_role_task(
+    ctx: Arc<Context>,
+    id: &UserId,
+    ticker: &str,
+) -> Result<(), Box<dyn Error>> {
     let cache_http = (&ctx.cache, ctx.http());
-
-    let change = get_gspc_change_percentage().await?;
-
     let guild = Guild::get(&ctx.http, NAMR1_GUILD_ID).await?;
-    let mut charles = guild.member(cache_http, CHARLES_ID).await?;
 
     let japanese_red = guild
         .roles
@@ -151,20 +157,22 @@ async fn charles_task(ctx: Arc<Context>) -> Result<(), Box<dyn Error>> {
         .get(&JAPANESE_GREEN_ID)
         .ok_or("Couldn't find role Japanese Green")?;
 
+    let change = get_ticker_change_percentage(ticker).await?;
+
+    let mut member = guild.member(cache_http, id).await?;
+
     let (set_role, unset_role) = if change > 0.0 {
-        // Set Charles rank to Japanese Red
         (japanese_red, japanese_green)
     } else {
-        // Set Charles rank to Japanese Green
         (japanese_green, japanese_red)
     };
 
-    if !charles.roles.contains(&set_role.id) {
-        charles.add_role(cache_http, set_role).await?;
+    if !member.roles.contains(&set_role.id) {
+        member.add_role(cache_http, set_role).await?;
     }
 
-    if charles.roles.contains(&unset_role.id) {
-        charles.remove_role(cache_http, unset_role).await?;
+    if member.roles.contains(&unset_role.id) {
+        member.remove_role(cache_http, unset_role).await?;
     }
 
     Ok(())
