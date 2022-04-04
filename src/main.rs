@@ -5,13 +5,14 @@ use chrono_tz;
 
 use dotenv::dotenv;
 
-use serenity::async_trait;
 use serenity::client::{Client, Context, EventHandler};
+use serenity::http::CacheHttp;
 use serenity::model::{
     guild::Guild,
     id::{GuildId, RoleId, UserId},
     prelude::Ready,
 };
+use serenity::{async_trait, CacheAndHttp};
 
 use std::env;
 use std::error::Error;
@@ -102,7 +103,7 @@ async fn get_gspc_change_percentage() -> Result<f64, Box<dyn Error>> {
 
 async fn charles_task_repeat(ctx: Arc<Context>) {
     // let mut long_interval = time::interval(Duration::from_secs(1 * 24 * 60 * 60)); // Long delay, once per day
-    let mut long_interval = time::interval(Duration::from_secs(5 * 60)); // Long delay, once per day
+    let mut long_interval = time::interval(Duration::from_secs(60)); // Long delay, every minute
     let mut short_interval = time::interval(Duration::from_secs(5)); // Short delay for when we encounter an error
 
     long_interval.set_missed_tick_behavior(MissedTickBehavior::Skip);
@@ -134,10 +135,12 @@ async fn charles_task(ctx: Arc<Context>) -> Result<(), Box<dyn Error>> {
     const NAMR1_GUILD_ID: GuildId = GuildId(286572805137498112);
     const CHARLES_ID: UserId = UserId(178070915542810624);
 
+    let cache_http = (&ctx.cache, ctx.http());
+
     let change = get_gspc_change_percentage().await?;
 
     let guild = Guild::get(&ctx.http, NAMR1_GUILD_ID).await?;
-    let mut charles = guild.member(&ctx.http, CHARLES_ID).await?;
+    let mut charles = guild.member(cache_http, CHARLES_ID).await?;
 
     let japanese_red = guild
         .roles
@@ -156,8 +159,13 @@ async fn charles_task(ctx: Arc<Context>) -> Result<(), Box<dyn Error>> {
         (japanese_green, japanese_red)
     };
 
-    charles.add_role(&ctx.http, set_role).await?;
-    charles.remove_role(&ctx.http, unset_role).await?;
+    if !charles.roles.contains(&set_role.id) {
+        charles.add_role(cache_http, set_role).await?;
+    }
+
+    if charles.roles.contains(&unset_role.id) {
+        charles.remove_role(cache_http, unset_role).await?;
+    }
 
     Ok(())
 }
