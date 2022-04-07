@@ -6,6 +6,7 @@ use chrono_tz;
 use dotenv::dotenv;
 
 use serenity::async_trait;
+use serenity::client::bridge::gateway::GatewayIntents;
 use serenity::client::{Client, Context, EventHandler};
 use serenity::http::CacheHttp;
 use serenity::model::{
@@ -211,6 +212,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .event_handler(Handler {
             is_loop_running: AtomicBool::new(false),
         })
+        .intents(GatewayIntents::GUILD_MEMBERS)
         .await
         .expect("Error creating client");
 
