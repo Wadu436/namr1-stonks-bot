@@ -90,7 +90,7 @@ async fn change_role_task(
     ticker: &str,
 ) -> Result<(), Box<dyn Error>> {
     let cache_http = (&ctx.cache, ctx.http());
-    let guild = Guild::get(&ctx.http, NAMR1_GUILD_ID).await?;
+    let guild = Guild::get(cache_http, NAMR1_GUILD_ID).await?;
 
     let japanese_red = guild
         .roles
@@ -151,10 +151,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Login with a bot token from the environment
     let token = env::var("DISCORD_TOKEN").expect("token");
     let mut client = Client::builder(token)
+        .intents(GatewayIntents::GUILD_MEMBERS | GatewayIntents::GUILDS)
         .event_handler(Handler {
             is_loop_running: AtomicBool::new(false),
         })
-        .intents(GatewayIntents::GUILD_MEMBERS)
         .await
         .expect("Error creating client");
 
