@@ -33,6 +33,7 @@ const USER_ID_TICKER: &[(UserId, &str)] = &[
     (UserId(178070915542810624), "^GSPC"),   // Charles
     (UserId(168355107396780032), "AMC"),     // Nam
     (UserId(158510518078930944), "IWDA.AS"), // Warre
+    (UserId(194862095257305092), "SBUX"),    // Albion
 ];
 
 #[async_trait]
