@@ -13,7 +13,7 @@ RUN rm /namr1-stonks-bot/target/release/deps/namr1_stonks_bot*
 
 # Build App
 COPY ./src ./src
-RUN cargo build --release
+RUN cargo build --bin namr1-stonks-bot --release
 
 # Final image
 FROM debian:buster-slim
