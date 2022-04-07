@@ -7,7 +7,7 @@ WORKDIR /namr1-stonks-bot
 COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
 
-RUN cargo build --release
+RUN cargo build --bin namr1-stonks-bot --release
 RUN rm src/*.rs
 RUN rm /namr1-stonks-bot/target/release/deps/namr1_stonks_bot*
 
