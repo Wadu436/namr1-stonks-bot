@@ -182,7 +182,7 @@ async fn change_role_task(
     if member.roles.contains(&unset_role.id) {
         println!(
             "Removing role {} to {}...",
-            set_role.name,
+            unset_role.name,
             member.display_name()
         );
         member.remove_role(cache_http, unset_role).await?;
