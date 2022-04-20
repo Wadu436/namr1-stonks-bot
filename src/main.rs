@@ -34,6 +34,7 @@ const USER_ID_TICKER: &[(UserId, &str)] = &[
     (UserId(168355107396780032), "AMC"),     // Nam
     (UserId(158510518078930944), "IWDA.AS"), // Warre
     (UserId(194862095257305092), "SBUX"),    // Albion
+    (UserId(267655547946270720), "NOK"),     // Kieran
 ];
 
 #[async_trait]
