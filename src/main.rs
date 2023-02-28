@@ -1,7 +1,7 @@
 use dotenv::dotenv;
 
 use serenity::async_trait;
-use serenity::client::bridge::gateway::GatewayIntents;
+use serenity::prelude::GatewayIntents;
 use serenity::client::{Client, Context, EventHandler};
 use serenity::http::CacheHttp;
 use serenity::model::{
@@ -152,8 +152,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Login with a bot token from the environment
     let token = env::var("DISCORD_TOKEN").expect("token");
-    let mut client = Client::builder(token)
-        .intents(GatewayIntents::GUILD_MEMBERS | GatewayIntents::GUILDS)
+    let mut client = Client::builder(token, GatewayIntents::GUILD_MEMBERS | GatewayIntents::GUILDS)
         .event_handler(Handler {
             is_loop_running: AtomicBool::new(false),
         })

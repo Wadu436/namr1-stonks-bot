@@ -1,4 +1,4 @@
-FROM rust:1.59.0 AS builder
+FROM rust:1.66.1 AS builder
 
 RUN USER=root cargo new --bin namr1-stonks-bot
 WORKDIR /namr1-stonks-bot
