@@ -67,5 +67,5 @@ jobs:
           script: |
             cd ~/namr1-stonks-bot/ && \
             docker load -i containers/namr1-stonks-latest.tar.gz && \
-            docker-compose up -d
+            docker compose up -d
           command_timeout: 5m
