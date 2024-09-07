@@ -1,4 +1,4 @@
-FROM rust:1.66.1 AS builder
+FROM rust:1.81.0 AS builder
 
 RUN USER=root cargo new --bin namr1-stonks-bot
 WORKDIR /namr1-stonks-bot
@@ -16,11 +16,10 @@ COPY ./src ./src
 RUN cargo build --bin namr1-stonks-bot --release
 
 # Final image
-FROM debian:buster-slim
+FROM debian:bookworm-slim
 WORKDIR /usr/app/
 
 # Copy the executable
-RUN apt-get update && apt-get install -y libssl1.1 ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /namr1-stonks-bot/target/release/namr1-stonks-bot /usr/app/
 
 # Start command
