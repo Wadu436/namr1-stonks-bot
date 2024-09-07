@@ -1,7 +1,6 @@
 use dotenv::dotenv;
 
 use serenity::async_trait;
-use serenity::prelude::GatewayIntents;
 use serenity::client::{Client, Context, EventHandler};
 use serenity::http::CacheHttp;
 use serenity::model::{
@@ -9,6 +8,7 @@ use serenity::model::{
     id::{GuildId, RoleId, UserId},
     prelude::Ready,
 };
+use serenity::prelude::GatewayIntents;
 
 use std::env;
 use std::error::Error;
@@ -18,6 +18,7 @@ use std::sync::{
 };
 use std::time::Duration;
 
+use color_eyre::eyre::Result;
 use tokio::time::{self, MissedTickBehavior};
 
 mod stocks;
@@ -30,11 +31,11 @@ const JAPANESE_GREEN_ID: RoleId = RoleId(621894745807126538);
 const JAPANESE_RED_ID: RoleId = RoleId(621894973360439299);
 const NAMR1_GUILD_ID: GuildId = GuildId(286572805137498112);
 const USER_ID_TICKER: &[(UserId, &str)] = &[
-    (UserId(178070915542810624), "MSFT"),    // Charles
+    (UserId(178070915542810624), "MSFT"), // Charles
     // (UserId(168355107396780032), "AMC"),     // Nam
     (UserId(158510518078930944), "^GSPC"), // Warre
-    (UserId(194862095257305092), "SBUX"),    // Albion
-    (UserId(267655547946270720), "NOK"),     // Kieran
+    (UserId(194862095257305092), "SBUX"),  // Albion
+    (UserId(267655547946270720), "NOK"),   // Kieran
 ];
 
 #[async_trait]
@@ -147,17 +148,21 @@ async fn change_role_task(
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> Result<()> {
+    color_eyre::install()?;
     dotenv().ok();
 
     // Login with a bot token from the environment
     let token = env::var("DISCORD_TOKEN").expect("token");
-    let mut client = Client::builder(token, GatewayIntents::GUILD_MEMBERS | GatewayIntents::GUILDS)
-        .event_handler(Handler {
-            is_loop_running: AtomicBool::new(false),
-        })
-        .await
-        .expect("Error creating client");
+    let mut client = Client::builder(
+        token,
+        GatewayIntents::GUILD_MEMBERS | GatewayIntents::GUILDS,
+    )
+    .event_handler(Handler {
+        is_loop_running: AtomicBool::new(false),
+    })
+    .await
+    .expect("Error creating client");
 
     // start listening for events by starting a single shard
     if let Err(why) = client.start().await {

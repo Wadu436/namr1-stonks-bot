@@ -15,9 +15,10 @@ path="src/test.rs"
 
 
 [dependencies]
-tokio = { version = "1.18", features = ["rt-multi-thread"] }
-yahoo_finance_api = "1.2"
+tokio = { version = "1", features = ["rt-multi-thread"] }
+yahoo_finance_api = "2"
 chrono = "0.4"
 chrono-tz = "0.6"
 serenity = { version = "0.11", default-features=false, features=["cache", "client", "gateway", "http", "rustls_backend", "model"]}
 dotenv = "0.15"
+color-eyre = "0.6.3"
